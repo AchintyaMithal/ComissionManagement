@@ -1,0 +1,47 @@
+[
+    {
+      "id": 1,
+      "status": "open",
+      "type": "Service",
+      "customerId": 1,
+      "productId": 2,
+      "model": "Xtreme X30",
+      "serialNumber": "1234567890",
+      "plannedDate": "2024-05-10"
+    },
+    {
+      "id": 2,
+      "status": "closed",
+      "type": "Warranty",
+      "customerId": 2,
+      "productId": 1,
+      "serialNumber": "9876543210",
+      "plannedDate": "2024-04-20"
+    },
+    {
+      "id": 3,
+      "status": "pending",
+      "type": "Repair",
+      "customerId": 3,
+      "productId": 4,
+      "plannedDate": "2024-05-15"
+    },
+    {
+      "id": 4,
+      "status": "open",
+      "type": "Service",
+      "customerId": 2,
+      "productId": 3,
+      "serialNumber": "ABCDEFGHIJ",
+      "plannedDate": "2024-05-05"
+    },
+    {
+      "id": 5,
+      "status": "closed",
+      "type": "Warranty",
+      "customerId": 1,
+      "productId": 2,
+      "serialNumber": "0123456789",
+      "plannedDate": "2024-04-15"
+    }
+  ]
