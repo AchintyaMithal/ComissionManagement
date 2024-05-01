@@ -1,5 +1,10 @@
 <template>
   <v-container>
+    <!-- Error Message -->
+    <v-alert v-if="error" type="error" >
+      {{ error }}
+    </v-alert>
+
     <!-- Heading and Back Button -->
     <v-card class="mb-5">
       <v-card-text class="d-flex align-center justify-space-between">
@@ -90,8 +95,9 @@ export default {
       isCustomerModalOpen: false,
       isEditing: false,
       commissions: '',
-      commissionTypes: ['Service', 'Warranty', 'Repair']
-    };
+      commissionTypes: ['Service', 'Warranty', 'Repair'],
+      error: null 
+        };
   },
   computed: {
     // Get products from store
@@ -101,18 +107,38 @@ export default {
     // Get product by ID
     productById() { return this.$store.getters['counter/getProductById'](this.productId); }
   },
+  watch: {
+    commissionType() { this.clearError(); },
+    plannedDate() { this.clearError(); },
+    crmCaseId() { this.clearError(); },
+    caseDescription() { this.clearError(); },
+    serialNumber() { this.clearError(); },
+    selectedProduct() { this.clearError(); },
+    selectedCustomer() { this.clearError(); }
+  },
   methods: {
     // Save draft commission
     saveDraft() {
+      if (!this.validateInputs()) return; // Validate inputs before proceeding
       const commission = { type: this.commissionType, status: "pending", plannedDate: this.plannedDate, id: parseInt(this.crmCaseId), caseDescription: this.caseDescription, serialNumber: this.serialNumber, productId: this.selectedProduct.id, customerId: this.selectedCustomer.id };
-      this.$store.dispatch('counter/saveDraft', commission);
-      this.$router.push('/comission-list');
+      try {
+        this.$store.dispatch('counter/saveDraft', commission);
+        this.$router.push('/comission-list');
+      } catch (error) {
+        this.error = "Failed to save draft. Please try again later.";
+      }
     },
     // Create commission
     createCase() {
+      this.clearError();
+      if (!this.validateInputs()) return; // Validate inputs before proceeding
       const commission = { type: this.commissionType, status: "open", plannedDate: this.plannedDate, id: parseInt(this.crmCaseId), caseDescription: this.caseDescription, serialNumber: this.serialNumber, productId: this.selectedProduct.id, customerId: this.selectedCustomer.id };
-      this.isEditing ? this.$store.dispatch('counter/updateComission', commission) : this.$store.dispatch('counter/saveDraft', commission);
-      this.$router.push('/comission-list');
+      try {
+        this.isEditing ? this.$store.dispatch('counter/updateComission', commission) : this.$store.dispatch('counter/saveDraft', commission);
+        this.$router.push('/comission-list');
+      } catch (error) {
+        this.error = "Failed to create commission. Please try again later.";
+      }
     },
     // Open product modal
     openProductModal() { this.isProductModalOpen = true; },
@@ -121,7 +147,17 @@ export default {
     // Handle product selection
     onProductSelected(product) { this.selectedProduct = product; this.isProductModalOpen = false; },
     // Handle customer selection
-    onCustomerSelected(customer) { this.selectedCustomer = customer; this.isCustomerModalOpen = false; }
+    onCustomerSelected(customer) { this.selectedCustomer = customer; this.isCustomerModalOpen = false; },
+    // Validate inputs
+    validateInputs() {
+      if (!this.commissionType || !this.plannedDate || !this.crmCaseId || !this.caseDescription || !this.serialNumber || !this.selectedProduct || !this.selectedCustomer) {
+        this.error = "Please fill in all fields.";
+        return false;
+      }
+      return true;
+    },
+    // Clear error message
+    clearError() { this.error = null; }
   },
   created() {
     // Get commission data if editing

@@ -1,5 +1,10 @@
 <template>
   <v-container class="commission-details">
+    <!-- Error Message -->
+    <v-alert v-if="error" type="error" dismissible>
+      {{ error }}
+    </v-alert>
+
     <v-row>
       <v-col cols="12" sm="6">
         <v-card>
@@ -62,8 +67,7 @@
                 <span>{{ selectedCustomer.email }}</span>
               </v-list-item>
             </v-list>
-        
-       </v-card-text>
+      </v-card-text>
     </v-card>
 
     <v-card>
@@ -85,27 +89,40 @@
                 <span>{{ selectedProduct.price }}</span>
               </v-list-item>
             </v-list>
-        
-       </v-card-text>
+      </v-card-text>
     </v-card>
   </v-container>
 </template>
-
 <script>
 export default {
   data() {
-    
     return {
-      commission: this.$route.params.id  ,
-      selectedProduct : null,
-      selectedCustomer :null
-    }
+      commission: null,
+      selectedProduct: null,
+      selectedCustomer: null,
+      error: null 
+    };
   },
   created() {
-    console.log(this.commission); // This should log the commission object (if passed)
-    this.selectedProduct = this.$store.getters['counter/getProductById'](this.commission.productId);
-  this.selectedCustomer = this.$store.getters['counter/getCustomerById'](this.commission.customerId);
-
+    // Retrieve commission data
+    const commissionId = this.$route.params.id;
+    if (!commissionId) {
+      this.error = "Commission not provided.";
+    } else {
+      this.commission = commissionId;
+      if (!this.commission) {
+        this.error = "Commission not found.";
+      } else {
+        // Retrieve selected product and customer
+        try {
+          this.selectedProduct = this.$store.getters['counter/getProductById'](this.commission.productId);
+          this.selectedCustomer = this.$store.getters['counter/getCustomerById'](this.commission.customerId);
+        } catch (error) {
+          this.error = "Error retrieving commission details.";
+          console.error("Error retrieving commission details:", error);
+        }
+      }
+    }
   }
 };
 </script>

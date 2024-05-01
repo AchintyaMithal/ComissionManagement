@@ -1,5 +1,10 @@
 <template>
   <v-container class="commission-container">
+    <!-- Error Message -->
+    <v-alert v-if="error" type="error" dismissible>
+      {{ error }}
+    </v-alert>
+
     <!-- Tabs -->
     <v-tabs v-model="selectedTab" background-color="#f5f5f5">
       <!-- Render tabs for each status -->
@@ -83,7 +88,8 @@ export default {
     return {
       searchId: "",
       selectedTab: "tab-all",
-      statuses: ["ALL", "OPEN", "IN-PROGRESS", "CLOSED", "CANCELED", "ON HOLD"]
+      statuses: ["ALL", "OPEN", "IN-PROGRESS", "CLOSED", "CANCELED", "ON HOLD"],
+      error: null
     };
   },
   created() {
@@ -106,8 +112,12 @@ export default {
   methods: {
     ...mapActions("counter", ["fetchCommissions", "deleteCommission"]),
     // Fetch commissions when component is created
-    initializeCommissions() {
-      this.fetchCommissions();
+    async initializeCommissions() {
+      try {
+        await this.fetchCommissions();
+      } catch (error) {
+        this.error = "Failed to fetch commissions. Please try again later.";
+      }
     },
     // Search commissions based on search query and selected tab
     searchCommission() {
@@ -149,6 +159,14 @@ export default {
     // Navigate to edit commission page
     editCommission(commission) {
       this.$router.push({ name: "comission-add", params: { id: commission } });
+    },
+    // Delete commission
+    async deleteCommission(commissionId) {
+      try {
+        await this.deleteCommission(commissionId);
+      } catch (error) {
+        this.error = "Failed to delete commission. Please try again later.";
+      }
     }
   }
 };
